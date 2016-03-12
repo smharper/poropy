@@ -21,8 +21,8 @@ from matplotlib import rc
 
 
 # Allows LaTeX in labels and uses nicer serif font.
-rc('text', usetex=True)
-rc('font', family='serif')
+#rc('text', usetex=True)
+#rc('font', family='serif')
 
 class Reactor(object) :
     """ Represents the reactor

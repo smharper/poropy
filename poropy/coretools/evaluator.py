@@ -5,8 +5,8 @@ Created on Feb 14, 2012
 '''
 import matplotlib.pyplot as plt
 from matplotlib import rc
-rc('text', usetex=True)
-rc('font', family='serif')
+#rc('text', usetex=True)
+#rc('font', family='serif')
 
 class Evaluator(object) :
     """ Abstract base class for evaluating patterns.
@@ -49,4 +49,4 @@ class Evaluator(object) :
         plt.imshow(self.peaking_map, interpolation='nearest', cmap=plt.cm.hot)  
         plt.title('power peaking')
         plt.colorbar()
-        plt.show() 
+        plt.show()
