@@ -35,18 +35,24 @@ class Assembly(object):
         self.model = model
         self.enrichment = enrichment
         self.burnup = burnup 
-       
+
+        self.load_data()
+
+        # Peaking factor.
+        self.peak = 0.0
+
+    def load_data(self):
         # Get the group data object.
         IFBA = 0
         WABA = 0
         GAD  = 0
-        if (model == "IFBA"):
+        if (self.model == "IFBA"):
             IFBA = 1
-        if (model == "WABA"):
+        if (self.model == "WABA"):
             WABA = 1   
-        if (model == "GAD"):
+        if (self.model == "GAD"):
             GAD = 1  
-        data = get_2g_parms(burnup, enrichment, IFBA, WABA, GAD)
+        data = get_2g_parms(self.burnup, self.enrichment, IFBA, WABA, GAD)
 
         # Set the group data.
         self.D1   = data.DIFF1
@@ -59,9 +65,6 @@ class Assembly(object):
         self.R1   = data.REMOV1 + data.ABS1  # the way CASMO defines them.
         self.KINF = data.K_INF_NO_XE
         self.M2   = data.M2_XE
-
-        # Peaking factor.
-        self.peak = 0.0
         
     def set_constants(self, data=[1.4493e+00,3.8070e-01,9.9000e-03, \
                                   1.0420e-01,7.9000e-03,1.6920e-01, \

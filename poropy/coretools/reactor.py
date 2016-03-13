@@ -4,6 +4,7 @@
 from assembly import Assembly, Reflector
 
 # others
+from copy import deepcopy
 import numpy as np
 import sys
 import os
@@ -205,6 +206,49 @@ class Reactor(object) :
         print " ----------------------- "
         print "    keff   = ", self.evaluator.keff    
         print " maxpeak   = ", self.evaluator.maxpeak  
+
+    def burn(self):
+        """Calculate the time-dependent behavior of the depleting core."""
+        # Initialize array of assembly exposures.
+        exposure = np.array([a.burnup for a in self.core.assemblies])
+        exposure_arr = [exposure]
+
+        # Initialize arrays of reactor keff and assembly peaking.
+        k, p = self.evaluate()
+        k_arr = [k]
+        peaking = np.array([a.peak for a in self.core.assemblies])
+        peaking_arr = [peaking]
+
+        # Define weights to account for rotational repetition.
+        assembly_weights = np.full(len(self.core.assemblies), 4, dtype=int)
+        assembly_weights[0] = 1
+
+        # Loop until the core is depleted to subcritical.
+        while k > 1:
+            # Compute the relative power of each assembly.
+            relative_power = np.array([a.peak for a in self.core.assemblies])
+            relative_power /= np.average(relative_power,
+                                         weights=assembly_weights)
+
+            # Initialize the exposures for the next depletion step.
+            exposure_arr.append(deepcopy(exposure_arr[-1]))
+
+            # Deplete each assembly relative to its power production.
+            exposure_arr[-1] += 0.50 * relative_power
+
+            # Update the nuclear data.
+            for i, a in enumerate(self.core.assemblies):
+                a.burnup = exposure_arr[-1][i]
+                a.load_data()
+            self.evaluator.setup(self.core)
+
+            # Compute this core and save the data.
+            k, p = self.evaluate()
+            k_arr.append(k)
+            peaking_arr.append(np.array([a.peak for a in self.core.assemblies]))
+
+        # Return depletion data.
+        return exposure_arr, k_arr, peaking_arr
 
 #    def fire_eval_signal(self,k,p):
 #        # we do this here so optimizers that evaluate the reactor a zillion times don't
